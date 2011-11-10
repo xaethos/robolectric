@@ -2,8 +2,10 @@ package com.xtremelabs.robolectric.shadows;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
+
 import com.xtremelabs.robolectric.internal.Implementation;
 import com.xtremelabs.robolectric.internal.Implements;
 import com.xtremelabs.robolectric.tester.android.database.TestCursor;
@@ -14,13 +16,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@SuppressWarnings({"UnusedDeclaration"})
 @Implements(ContentResolver.class)
 public class ShadowContentResolver {
     private int nextDatabaseIdForInserts;
 
     private TestCursor cursor;
     private List<Uri> deletedUris = new ArrayList<Uri>();
+    private List<Uri> notifiedUris = new ArrayList<Uri>();
     private HashMap<Uri,TestCursor> uriCursorMap = new HashMap<Uri, TestCursor>();
 
 
@@ -61,6 +63,16 @@ public class ShadowContentResolver {
         return 1;
     }
 
+    @Implementation
+    public void notifyChange (Uri uri, ContentObserver observer, boolean syncToNetwork) {
+    	notifiedUris.add(uri);
+    }
+
+    @Implementation
+    public void notifyChange (Uri uri, ContentObserver observer) {
+    	notifiedUris.add(uri);
+    }
+
     public void setCursor(TestCursor cursor) {
         this.cursor = cursor;
     }
@@ -85,5 +97,9 @@ public class ShadowContentResolver {
         } else {
             return null;
         }
+    }
+
+    public List<Uri> getNotifiedUris() {
+    	return notifiedUris;
     }
 }

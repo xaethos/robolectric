@@ -108,6 +108,19 @@ public class ContentResolverTest {
         assertThat(contentResolver.openInputStream(uri21), CoreMatchers.instanceOf(InputStream.class));
     }
 
+    @Test
+    public void notifyChange_shouldTrackNotifiedUris() {
+        assertThat(shadowContentResolver.getNotifiedUris().size(), equalTo(0));
+
+        contentResolver.notifyChange(uri21, null);
+        assertThat(shadowContentResolver.getNotifiedUris(), hasItem(uri21));
+        assertThat(shadowContentResolver.getNotifiedUris().size(), equalTo(1));
+
+        contentResolver.notifyChange(uri22, null, false);
+        assertThat(shadowContentResolver.getNotifiedUris(), hasItem(uri22));
+        assertThat(shadowContentResolver.getNotifiedUris().size(), equalTo(2));
+    }
+
     class QueryParamTrackingTestCursor extends TestCursor {
         public Uri uri;
         public String[] projection;
